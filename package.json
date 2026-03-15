@@ -1,0 +1,43 @@
+{
+  "name": "cleaner-x",
+  "version": "1.0.0",
+  "description": "Windows Computer Cleaner with UI/UX",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win",
+    "pack": "electron-builder --dir"
+  },
+  "author": "Cleaner X",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
+  },
+  "dependencies": {
+    "electron-log": "^5.0.0"
+  },
+  "build": {
+    "appId": "com.cleanerx.app",
+    "productName": "Cleaner X",
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer/**/*",
+      "cleaner.js"
+    ]
+  }
+}
