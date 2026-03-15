@@ -2,6 +2,10 @@
 
 A modern Windows desktop application for cleaning and optimizing your computer. Built with Electron.
 
+## Author
+
+**Abe Prangishvili**
+
 ## Features
 
 - **System Monitoring** - View CPU, memory, and system information
