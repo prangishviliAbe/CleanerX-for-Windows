@@ -1,17 +1,63 @@
+// Current language
+let currentLang = 'en';
+
 // DOM Elements
 const navItems = document.querySelectorAll('.nav-item');
 const contentSections = document.querySelectorAll('.content-section');
+
+// Language Toggle
+document.querySelectorAll('.lang-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentLang = btn.dataset.lang;
+    updateLanguage();
+    updateSettingsLanguage();
+  });
+});
+
+// Language selector in settings
+document.querySelectorAll('.lang-option').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.lang-option').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentLang = btn.dataset.lang;
+    updateLanguage();
+    
+    // Update sidebar lang buttons too
+    document.querySelectorAll('.lang-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.lang === currentLang);
+    });
+  });
+});
+
+function updateLanguage() {
+  document.querySelectorAll('[data-en][data-ka]').forEach(el => {
+    el.textContent = el.dataset[currentLang];
+  });
+}
+
+function updateSettingsLanguage() {
+  const langBtns = document.querySelectorAll('.lang-btn');
+  const langOpts = document.querySelectorAll('.lang-option');
+  
+  langBtns.forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.lang === currentLang);
+  });
+  
+  langOpts.forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.lang === currentLang);
+  });
+}
 
 // Navigation
 navItems.forEach(item => {
   item.addEventListener('click', () => {
     const sectionId = item.dataset.section;
     
-    // Update active nav item
     navItems.forEach(nav => nav.classList.remove('active'));
     item.classList.add('active');
     
-    // Show corresponding section
     contentSections.forEach(section => {
       section.classList.remove('active');
       if (section.id === sectionId) {
@@ -21,7 +67,7 @@ navItems.forEach(item => {
   });
 });
 
-// Format bytes to human readable
+// Format bytes
 function formatBytes(bytes) {
   if (bytes === 0) return '0 B';
   const k = 1024;
@@ -30,21 +76,42 @@ function formatBytes(bytes) {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
-// Load system info on startup
+// Load system info
 async function loadSystemInfo() {
   try {
     const info = await window.electronAPI.getSystemInfo();
     
-    document.getElementById('cpu-info').textContent = `${info.cpuModel} (${info.cpuCores} ბირთვი)`;
-    document.getElementById('memory-info').textContent = `${info.usedMemory} / ${info.totalMemory}`;
-    document.getElementById('system-info').textContent = `${info.hostname}`;
+    // CPU
+    document.getElementById('cpu-usage').textContent = info.cpuUsage + '%';
+    document.getElementById('cpu-bar').style.width = info.cpuUsage + '%';
+    document.getElementById('cpu-model').textContent = info.cpuModel.substring(0, 40) + '...';
+    
+    // Memory
+    document.getElementById('memory-usage').textContent = info.memory.percent + '%';
+    document.getElementById('memory-bar').style.width = info.memory.percent + '%';
+    document.getElementById('memory-detail').textContent = `${info.memory.used} / ${info.memory.total}`;
+    
+    // Disk - show first drive
+    if (info.disks && info.disks.length > 0) {
+      const disk = info.disks[0];
+      document.getElementById('disk-usage').textContent = disk.percent + '%';
+      document.getElementById('disk-bar').style.width = disk.percent + '%';
+      document.getElementById('disk-detail').textContent = `${disk.drive} ${disk.type}: ${disk.used} / ${disk.total}`;
+    } else {
+      document.getElementById('disk-usage').textContent = 'N/A';
+      document.getElementById('disk-detail').textContent = 'No disk info';
+    }
+    
+    // Power
+    document.getElementById('power-status').textContent = info.power.status;
+    document.getElementById('battery-detail').textContent = info.power.battery;
+    
+    // System info
+    document.getElementById('system-info').textContent = `${info.hostname} | ${info.osVersion}`;
     document.getElementById('uptime-info').textContent = info.uptime;
+    
   } catch (error) {
     console.error('Error loading system info:', error);
-    document.getElementById('cpu-info').textContent = 'ვერ ჩაიტვირთა';
-    document.getElementById('memory-info').textContent = 'ვერ ჩაიტვირთა';
-    document.getElementById('system-info').textContent = 'ვერ ჩაიტვირთა';
-    document.getElementById('uptime-info').textContent = 'ვერ ჩაიტვირთა';
   }
 }
 
@@ -56,13 +123,12 @@ document.getElementById('quick-scan-btn').addEventListener('click', async () => 
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin">
       <circle cx="12" cy="12" r="10" stroke-dasharray="60" stroke-dashoffset="20"/>
     </svg>
-    სკანირდება...
+    <span>${currentLang === 'en' ? 'Scanning...' : 'ისკანირებს...'}</span>
   `;
   
   try {
     const result = await window.electronAPI.quickScan();
     
-    // Show results
     const scanResults = document.getElementById('scan-results');
     const resultsGrid = document.getElementById('results-grid');
     
@@ -77,7 +143,7 @@ document.getElementById('quick-scan-btn').addEventListener('click', async () => 
     scanResults.style.display = 'block';
   } catch (error) {
     console.error('Scan error:', error);
-    alert('სკანირების შეცდომა: ' + error.message);
+    alert(currentLang === 'en' ? 'Scan error: ' + error.message : 'სკანირების შეცდომა: ' + error.message);
   }
   
   btn.disabled = false;
@@ -86,13 +152,14 @@ document.getElementById('quick-scan-btn').addEventListener('click', async () => 
       <circle cx="11" cy="11" r="8"/>
       <line x1="21" y1="21" x2="16.65" y2="16.65"/>
     </svg>
-    სწრაფი სკანირება
+    <span data-en="Quick Scan" data-ka="სწრაფი სკანირება">${currentLang === 'en' ? 'Quick Scan' : 'სწრაფი სკანირება'}</span>
   `;
 });
 
 // Full Clean
 document.getElementById('full-clean-btn').addEventListener('click', async () => {
-  if (!confirm('გსურთ სრული გაწმენდა? ეს წაშლის ყველას მონიშნულ ფაილებს.')) {
+  const confirmMsg = currentLang === 'en' ? 'Run full clean? This will delete all selected files.' : 'გსურთ სრული გაწმენდა? ეს წაშლის ყველას მონიშნულ ფაილებს.';
+  if (!confirm(confirmMsg)) {
     return;
   }
   
@@ -102,10 +169,9 @@ document.getElementById('full-clean-btn').addEventListener('click', async () => 
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin">
       <circle cx="12" cy="12" r="10" stroke-dasharray="60" stroke-dashoffset="20"/>
     </svg>
-    იწმინდება...
+    <span>${currentLang === 'en' ? 'Cleaning...' : 'იწმინდებს...'}</span>
   `;
   
-  // Show progress
   const progressArea = document.getElementById('progress-area');
   const progressFill = document.getElementById('progress-fill');
   const progressText = document.getElementById('progress-text');
@@ -114,7 +180,6 @@ document.getElementById('full-clean-btn').addEventListener('click', async () => 
   progressArea.style.display = 'block';
   resultMessage.style.display = 'none';
   
-  // Animate progress
   let progress = 0;
   const progressInterval = setInterval(() => {
     progress += Math.random() * 15;
@@ -127,9 +192,8 @@ document.getElementById('full-clean-btn').addEventListener('click', async () => 
     
     clearInterval(progressInterval);
     progressFill.style.width = '100%';
-    progressText.textContent = 'დასრულებულია!';
+    progressText.textContent = currentLang === 'en' ? 'Done!' : 'დასრულებულია!';
     
-    // Show result message
     setTimeout(() => {
       progressArea.style.display = 'none';
       progressFill.style.width = '0%';
@@ -138,12 +202,11 @@ document.getElementById('full-clean-btn').addEventListener('click', async () => 
       resultMessage.style.display = 'flex';
     }, 500);
     
-    // Refresh system info
     loadSystemInfo();
   } catch (error) {
     clearInterval(progressInterval);
     console.error('Clean error:', error);
-    alert('გაწმენდის შეცდომა: ' + error.message);
+    alert(currentLang === 'en' ? 'Clean error: ' + error.message : 'გაწმენდის შეცდომა: ' + error.message);
     progressArea.style.display = 'none';
   }
   
@@ -152,7 +215,7 @@ document.getElementById('full-clean-btn').addEventListener('click', async () => 
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
     </svg>
-    სრული გაწმენდა
+    <span>${currentLang === 'en' ? 'Full Clean' : 'სრული გაწმენდა'}</span>
   `;
 });
 
@@ -174,9 +237,8 @@ async function performClean(cleanFunction, buttonId) {
   const originalText = btn.textContent;
   
   btn.disabled = true;
-  btn.textContent = 'იწმინდება...';
+  btn.textContent = currentLang === 'en' ? 'Cleaning...' : 'იწმინდებს...';
   
-  // Show progress
   const progressArea = document.getElementById('progress-area');
   const progressFill = document.getElementById('progress-fill');
   const progressText = document.getElementById('progress-text');
@@ -211,7 +273,7 @@ async function performClean(cleanFunction, buttonId) {
     
     clearInterval(progressInterval);
     progressFill.style.width = '100%';
-    progressText.textContent = 'დასრულებულია!';
+    progressText.textContent = currentLang === 'en' ? 'Done!' : 'დასრულებულია!';
     
     setTimeout(() => {
       progressArea.style.display = 'none';
@@ -224,7 +286,7 @@ async function performClean(cleanFunction, buttonId) {
   } catch (error) {
     clearInterval(progressInterval);
     console.error('Clean error:', error);
-    alert('გაწმენდის შეცდომა: ' + error.message);
+    alert(currentLang === 'en' ? 'Clean error: ' + error.message : 'გაწმენდის შეცდომა: ' + error.message);
     progressArea.style.display = 'none';
   }
   
@@ -236,6 +298,6 @@ async function performClean(cleanFunction, buttonId) {
 document.addEventListener('DOMContentLoaded', () => {
   loadSystemInfo();
   
-  // Refresh system info every 30 seconds
-  setInterval(loadSystemInfo, 30000);
+  // Refresh system info every 5 seconds
+  setInterval(loadSystemInfo, 5000);
 });
