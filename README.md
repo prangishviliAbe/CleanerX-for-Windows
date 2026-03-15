@@ -2,13 +2,9 @@
 
 A modern Windows desktop application for cleaning and optimizing your computer. Built with Electron.
 
-## Author
-
-**Abe Prangishvili**
-
 ## Features
 
-- **System Monitoring** - View CPU, memory, and system information
+- **System Monitoring** - Real-time CPU, Memory, Disk, and Power status
 - **Quick Scan** - Analyze cleanable files
 - **Full Clean** - Clean all junk files at once
 - **Temporary Files Cleanup** - Remove Windows and user temp files
@@ -16,11 +12,19 @@ A modern Windows desktop application for cleaning and optimizing your computer. 
 - **Recycle Bin Cleanup** - Empty the recycle bin
 - **System Logs Cleanup** - Clean Windows logs and update cache
 
+## Detailed System Stats
+
+- **CPU** - Usage percentage and model info
+- **Memory** - RAM usage, used/total
+- **Disk** - HDD/SSD usage per drive
+- **Power** - Battery status or desktop power info
+
 ## Modern UI/UX
 
 - Dark theme with modern gradients
 - Progress bars for cleaning operations
-- Georgian language interface
+- Bilingual interface (English/Georgian)
+- Real-time system monitoring
 - Responsive design
 
 ## Installation
@@ -53,11 +57,19 @@ npm run build
 
 The executable will be in `dist/win-unpacked/Cleaner X.exe`
 
+## Language
+
+The application supports English and Georgian languages. Toggle between languages using the EN/KA buttons in the sidebar or in Settings.
+
 ## Tech Stack
 
 - **Electron** - Desktop application framework
 - **HTML/CSS/JavaScript** - Frontend
 - **Node.js** - Backend
+
+## Author
+
+**Abe Prangishvili**
 
 ## License
 
